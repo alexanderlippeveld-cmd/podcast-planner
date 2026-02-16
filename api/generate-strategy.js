@@ -52,7 +52,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 8000,
+        max_tokens: 16000, // Increased from 8000 for complex strategies
         messages: [
           { role: 'user', content: prompt }
         ]
