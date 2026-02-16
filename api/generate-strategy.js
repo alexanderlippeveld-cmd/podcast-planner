@@ -2,6 +2,15 @@
 // Vercel Serverless Function
 
 export default async function handler(req, res) {
+  // Handle OPTIONS request for CORS
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    return res.status(200).end();
+  }
+
   // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -10,7 +19,7 @@ export default async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   try {
@@ -24,8 +33,14 @@ export default async function handler(req, res) {
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {
-      return res.status(500).json({ error: 'API key not configured' });
+      console.error('ANTHROPIC_API_KEY is not set in environment variables');
+      return res.status(500).json({ 
+        error: 'API key not configured in Vercel. Please add ANTHROPIC_API_KEY to Environment Variables in Vercel Settings.' 
+      });
     }
+
+    console.log('API Key found, length:', apiKey.length);
+    console.log('API Key starts with:', apiKey.substring(0, 10) + '...');
 
     // Call Anthropic API
     const response = await fetch('https://api.anthropic.com/v1/messages', {
