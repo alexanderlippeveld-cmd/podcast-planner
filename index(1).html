@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podcast Strategy Planner - AI Powered</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Icons
+        const Sparkles = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path>
+            </svg>
+        );
+
+        const Download = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+        );
+
+        const Loader2 = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+            </svg>
+        );
+
+        const Brain = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path>
+                <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path>
+            </svg>
+        );
+
+        const PodcastStrategyPlanner = () => {
+            const [step, setStep] = useState('form');
+            const [formData, setFormData] = useState({
+                seriesTitle: '',
+                seriesDescription: '',
+                publishingRhythm: 'weekly',
+                episodeCount: '4',
+                seriesType: 'miniseries',
+                startDate: '',
+                targetAudience: '',
+                involvedPeople: ''
+            });
+            const [strategy, setStrategy] = useState(null);
+            const [loading, setLoading] = useState(false);
+
+            const handleInputChange = (field, value) => {
+                setFormData(prev => ({ ...prev, [field]: value }));
+            };
+
+            const generateStrategy = async () => {
+                setLoading(true);
+                
+                const prompt = `Je bent een expert podcast marketing strateeg voor De Standaard. Genereer een COMPLEET MARKETING- EN PUBLICATIEPLAN voor een nieuwe podcast.
+
+BELANGRIJK: Dit gaat ALLEEN over marketing en publicatie - genereer GEEN episode titels of inhoudelijke concepten.
+
+BASISINFORMATIE:
+- Naam podcast: ${formData.seriesTitle}
+- Beschrijving: ${formData.seriesDescription}
+- Publicatieritme: ${formData.publishingRhythm === 'weekly' ? 'Wekelijks' : formData.publishingRhythm === 'biweekly' ? 'Tweewekelijks' : 'Dagelijks'}
+- Aantal afleveringen: ${formData.episodeCount}
+- Type: ${formData.seriesType === 'miniseries' ? 'Minireeks' : formData.seriesType === 'ongoing' ? 'Vaste reeks (doorlopend)' : 'Bonusaflevering'}
+- Startdatum: ${formData.startDate}
+- Doelgroep: ${formData.targetAudience}
+- Betrokkenen: ${formData.involvedPeople}
+
+BESCHIKBARE PUBLICATIETOOLS (selecteer strategisch uit deze lijst):
+
+VOOR LANCERING:
+- Tag en feed aanmaken
+- Tag introduction aanmaken met intro en icoon
+- Audiotrailer
+- Trailer mee in andere podcasts
+- Videotrailer
+- Artikel ter aankondiging van de reeks
+- Podcastreeks aanmaken in Zebra
+- Feed indienen bij Apple, Spotify & DS Podcast
+
+BIJ LANCERING - Cross-promotie:
+- Bonusaflevering in DS Vandaag/andere feed
+- Lange teaser (3-5 min) in DS Vandaag/andere feed
+- Midroll in andere podcasts: DS Vandaag, Bits & atomen, Kop of munt, Bar miroir, Uit het hart, Politieke podcast
+- Crosspromo NB/DS/HBVL/GVA
+- Podcastnieuwsbrief
+- Teaser XL op p3 in krant
+- Podcasttips Weekblad
+
+BIJ LANCERING - Eigen kanalen:
+- Pushbericht (breed segment / podcastsegment + webpush)
+- Artikel hoog in dagelijkse nieuwsbrief
+- Artikel in themanieuwsbrief
+- Aflevering in nieuwsblok 1 (later podcastzone)
+- Nieuwsbrieven: Ochtendupdate, Middagupdate, Laat, Goeienavond, Themanieuwsbrieven
+- Titel-testen
+
+BIJ LANCERING - Social Media:
+- Facebook (posts, podcast-artikels, audio snippets, images met quotes, video teasers)
+- LinkedIn (indien relevant)
+- Instagram (posts, fotopost, reel, podcast-artikels, audio snippets, images met quotes, video teasers)
+- TikTok (video teasers)
+- Snapchat (video teasers)
+
+TIJDENS LANCERING - Betaalde promotie:
+- Bannering in nieuwsbrieven
+- Breaker
+- Bannering GAM (vaste banner artikeldetail, banner waarin podcast meteen afspeelt)
+- Externe banners (VRT/Roularta)
+- Getsitecontrol popup
+- Video preroll
+- Podcast preroll/midroll (cross promo)
+- Commerciële mail / Partnermail
+- Paid social: Facebook, Instagram, TikTok, Snapchat, YouTube Google Ads
+- Spotify ads, Apple Music ads
+- Google search ads, Google display ads
+- Advertenties: Papier, papieren weekenbijlage, digitale krant, digitale weekendbijlage, digitale bundel (DS Avond)
+- Stopper
+- TV / Radio / OOH
+- Podcastfestival
+
+GENEREER EEN STRATEGIE MET:
+
+1. **Strategie overzicht**
+   - Kernstrategie (2-3 zinnen)
+   - Doelgroep analyse
+   - Unique selling point
+   - Marketing doelen
+
+2. **Timeline per fase**
+   Voor lancering (2-4 weken voor):
+   - Welke tools gebruiken
+   - Wanneer starten
+   - Verantwoordelijkheden
+   
+   Bij lancering (lanceerweek):
+   - Welke kanalen activeren
+   - Timing per kanaal
+   - Key messages
+   
+   Tijdens reeks:
+   - Doorlopende activiteiten
+   - Per aflevering acties
+   - Momentum behouden
+
+3. **Tool selectie & rationale**
+   - Selecteer 15-25 meest effectieve tools voor DEZE podcast
+   - Leg uit WAAROM deze tools passen bij doelgroep en content
+   - Prioriteer op basis van verwachte impact
+
+4. **Cross-promotie strategie**
+   - In welke podcasts midrolls/teasers
+   - Timing en frequentie
+   - Boodschap per kanaal
+
+5. **Paid advertising strategie**
+   - Aanbevolen budget verdeling
+   - Welke kanalen (social/display/audio/traditioneel)
+   - Timing en duur
+
+6. **Social media strategie**
+   - Per platform: content types, frequentie, timing
+   - Hashtag strategie
+   - Community engagement plan
+
+7. **KPIs & Meetplan**
+   - Primaire metrics
+   - Targets per fase
+   - Hoe en wanneer meten
+
+BELANGRIJK:
+- GEEN episode titels bedenken
+- Focus op MARKETING en PUBLICATIE
+- Wees specifiek over timing (exacte datums/weken)
+- Selecteer slim uit beschikbare tools (niet alles gebruiken)
+- Pas strategie aan op doelgroep en type podcast
+
+Geef antwoord als JSON (zonder markdown):
+{
+  "strategyOverview": {
+    "coreStrategy": "string",
+    "targetAudienceAnalysis": "string",
+    "uniqueSellingPoint": "string",
+    "marketingGoals": ["goal1", "goal2"]
+  },
+  "timeline": {
+    "preLaunch": {
+      "weeksMinus4to3": [{"tool": "string", "action": "string", "date": "YYYY-MM-DD", "owner": "string"}],
+      "weeksMinus2to1": [{"tool": "string", "action": "string", "date": "YYYY-MM-DD", "owner": "string"}]
+    },
+    "launchWeek": {
+      "activities": [{"tool": "string", "action": "string", "timing": "string", "keyMessage": "string"}]
+    },
+    "duringSeries": {
+      "ongoing": [{"tool": "string", "frequency": "string", "action": "string"}],
+      "perEpisode": [{"tool": "string", "timing": "string", "action": "string"}]
+    }
+  },
+  "toolSelection": {
+    "selectedTools": [
+      {"tool": "string", "category": "string", "priority": "high/medium/low", "rationale": "string", "timing": "string"}
+    ],
+    "notUsedTools": ["tool1", "tool2"],
+    "budgetEstimate": "string"
+  },
+  "crossPromotion": {
+    "midrolls": [{"podcast": "string", "dates": ["YYYY-MM-DD"], "message": "string"}],
+    "teasers": [{"location": "string", "type": "string", "duration": "string", "publishDate": "YYYY-MM-DD"}],
+    "crossPromoArticles": [{"platform": "string", "timing": "string"}]
+  },
+  "paidAdvertising": {
+    "budgetAllocation": {"channel": "percentage"},
+    "campaigns": [{"channel": "string", "budget": "string", "startDate": "YYYY-MM-DD", "endDate": "YYYY-MM-DD", "targeting": "string"}]
+  },
+  "socialMedia": {
+    "facebook": {"contentTypes": [], "frequency": "string", "timing": "string", "kpis": []},
+    "instagram": {"contentTypes": [], "frequency": "string", "timing": "string", "kpis": []},
+    "linkedin": {"contentTypes": [], "frequency": "string", "timing": "string", "kpis": []},
+    "tiktok": {"contentTypes": [], "frequency": "string", "timing": "string", "kpis": []}
+  },
+  "kpis": {
+    "primaryMetrics": ["metric1", "metric2"],
+    "targets": {
+      "launchWeek": {"downloads": "number", "newSubscribers": "number"},
+      "endOfSeries": {"totalDownloads": "number", "completionRate": "percentage"}
+    },
+    "measurementPlan": "string"
+  },
+  "recommendations": {
+    "criticalSuccessFactors": ["factor1", "factor2"],
+    "risks": [{"risk": "string", "mitigation": "string"}],
+    "weeklyChecklist": ["item1", "item2"]
+  }
+}`;
+
+                try {
+                    // Call our secure backend instead of Anthropic API directly
+                    // Use absolute path to ensure it works on Vercel
+                    const apiUrl = window.location.origin + '/api/generate-strategy';
+                    
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            prompt: prompt
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `HTTP ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error.message || 'API error');
+                    }
+                    
+                    const content = data.content[0].text;
+                    
+                    // Parse JSON from response
+                    const jsonMatch = content.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        const strategyData = JSON.parse(jsonMatch[0]);
+                        setStrategy(strategyData);
+                        setStep('results');
+                    } else {
+                        throw new Error('Could not parse AI response');
+                    }
+                } catch (error) {
+                    console.error('Error generating strategy:', error);
+                    alert('Er ging iets mis bij het genereren van de strategie. Controleer je internetverbinding en probeer opnieuw. Error: ' + error.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const exportToExcel = () => {
+                if (!strategy) return;
+
+                let csv = 'Publicatieschema ' + formData.seriesTitle + '\n\n';
+                csv += 'STRATEGIE OVERZICHT\n';
+                csv += 'Tagline,' + strategy.strategyOverview.tagline + '\n';
+                csv += 'Kernstrategie,' + strategy.strategyOverview.coreStrategy + '\n';
+                csv += 'Doelgroep,' + strategy.strategyOverview.targetAudience + '\n\n';
+                
+                csv += 'PUBLICATIESCHEMA\n';
+                csv += 'Afl,Datum,Dag,Tijd,Deadline,Titel,Gratis/Betalend,Voordeel Abonnees\n';
+                
+                if (strategy.trailer) {
+                    csv += `Trailer,${strategy.trailer.publishDate},-,${strategy.trailer.publishTime},-,${strategy.trailer.message.substring(0, 50)}...,Gratis,-\n`;
+                }
+                
+                strategy.episodes.forEach(ep => {
+                    csv += `${ep.number},${ep.publishDate},${ep.publishDay},${ep.publishTime},${ep.deadline},"${ep.title}",${ep.accessType},"${ep.subscriberBenefit || '-'}"\n`;
+                });
+
+                csv += '\n\nMARKETING TIMELINE\n';
+                csv += 'Fase,Week,Datum,Activiteit,Kanaal,Doel\n';
+                
+                ['preLaunch', 'launchWeek', 'duringSeries', 'postLaunch'].forEach(phase => {
+                    const phaseName = phase === 'preLaunch' ? 'Pre-Launch' : 
+                                     phase === 'launchWeek' ? 'Launch Week' :
+                                     phase === 'duringSeries' ? 'Tijdens Reeks' : 'Post-Launch';
+                    strategy.marketingTimeline[phase]?.forEach(weekData => {
+                        weekData.activities?.forEach(act => {
+                            csv += `${phaseName},${weekData.week},${act.date},"${act.activity}",${act.channel},"${act.goal}"\n`;
+                        });
+                    });
+                });
+
+                csv += '\n\nCROSS-PROMOTIE\n';
+                csv += 'Type,Datum,Platform,Boodschap\n';
+                
+                strategy.crossPromotion.midrolls?.forEach(m => {
+                    m.dates.forEach(date => {
+                        csv += `Midroll,${date},${m.podcast},"${m.message}"\n`;
+                    });
+                });
+                
+                strategy.crossPromotion.teasers?.forEach(t => {
+                    csv += `${t.type},${t.publishDate},"${t.platforms.join('; ')}","${t.content}"\n`;
+                });
+
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${formData.seriesTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_strategie.csv`;
+                a.click();
+            };
+
+            if (step === 'form') {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-8">
+                        <div className="max-w-3xl mx-auto">
+                            <div className="bg-white rounded-3xl shadow-2xl p-10">
+                                <div className="flex items-center gap-4 mb-8">
+                                    <div className="bg-gradient-to-br from-purple-600 to-pink-600 p-3 rounded-2xl">
+                                        <Brain />
+                                    </div>
+                                    <div>
+                                        <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                                            Podcast Strategy Planner
+                                        </h1>
+                                        <p className="text-gray-600 mt-1">AI genereert je complete publicatiestrategie</p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-6 mb-8">
+                                    <p className="text-sm text-purple-900">
+                                        <strong>🧠 Slim & Eenvoudig:</strong> Vul de basisinfo in en laat AI een complete marketing- en publicatiestrategie maken met alle juiste tools en timing!
+                                    </p>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-800 mb-2">
+                                            Naam podcast *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.seriesTitle}
+                                            onChange={(e) => handleInputChange('seriesTitle', e.target.value)}
+                                            placeholder="Bijv. Ik heb straks een date"
+                                            className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-800 mb-2">
+                                            Beschrijving *
+                                        </label>
+                                        <textarea
+                                            value={formData.seriesDescription}
+                                            onChange={(e) => handleInputChange('seriesDescription', e.target.value)}
+                                            placeholder="Waar gaat de podcast over? Wat is het thema? Bijv: Berten en Barbara smijten zich op de datingmarkt en proberen aan een lief te geraken."
+                                            rows="4"
+                                            className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg resize-none"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-800 mb-2">
+                                            Publicatieritme *
+                                        </label>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            {[
+                                                { value: 'weekly', label: 'Wekelijks', icon: '📅' },
+                                                { value: 'biweekly', label: 'Tweewekelijks', icon: '📆' },
+                                                { value: 'daily', label: 'Dagelijks', icon: '🗓️' }
+                                            ].map(rhythm => (
+                                                <label
+                                                    key={rhythm.value}
+                                                    className={`p-4 border-2 rounded-xl cursor-pointer transition-all text-center ${
+                                                        formData.publishingRhythm === rhythm.value
+                                                            ? 'border-purple-500 bg-purple-50'
+                                                            : 'border-gray-200 hover:border-purple-300'
+                                                    }`}
+                                                >
+                                                    <input
+                                                        type="radio"
+                                                        name="publishingRhythm"
+                                                        value={rhythm.value}
+                                                        checked={formData.publishingRhythm === rhythm.value}
+                                                        onChange={(e) => handleInputChange('publishingRhythm', e.target.value)}
+                                                        className="hidden"
+                                                    />
+                                                    <div className="text-2xl mb-1">{rhythm.icon}</div>
+                                                    <div className="text-sm font-semibold text-gray-800">{rhythm.label}</div>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-bold text-gray-800 mb-2">
+                                                Aantal afleveringen *
+                                            </label>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                max="52"
+                                                value={formData.episodeCount}
+                                                onChange={(e) => handleInputChange('episodeCount', e.target.value)}
+                                                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-bold text-gray-800 mb-2">
+                                                Startdatum *
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={formData.startDate}
+                                                onChange={(e) => handleInputChange('startDate', e.target.value)}
+                                                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-800 mb-2">
+                                            Type podcast *
+                                        </label>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            {[
+                                                { value: 'miniseries', label: '📚 Minireeks', desc: 'Beperkt aantal afleveringen' },
+                                                { value: 'ongoing', label: '🔄 Vast', desc: 'Doorlopende reeks' },
+                                                { value: 'bonus', label: '⭐ Bonus', desc: 'Eenmalige special' }
+                                            ].map(type => (
+                                                <label
+                                                    key={type.value}
+                                                    className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                                                        formData.seriesType === type.value
+                                                            ? 'border-purple-500 bg-purple-50'
+                                                            : 'border-gray-200 hover:border-purple-300'
+                                                    }`}
+                                                >
+                                                    <input
+                                                        type="radio"
+                                                        name="seriesType"
+                                                        value={type.value}
+                                                        checked={formData.seriesType === type.value}
+                                                        onChange={(e) => handleInputChange('seriesType', e.target.value)}
+                                                        className="hidden"
+                                                    />
+                                                    <div className="font-semibold text-gray-800">{type.label}</div>
+                                                    <div className="text-xs text-gray-600 mt-1">{type.desc}</div>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-800 mb-2">
+                                            Doelgroep *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.targetAudience}
+                                            onChange={(e) => handleInputChange('targetAudience', e.target.value)}
+                                            placeholder="Bijv. Singles 25-40 jaar, of DS abonnees geïnteresseerd in relaties"
+                                            className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-800 mb-2">
+                                            Betrokkenen *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.involvedPeople}
+                                            onChange={(e) => handleInputChange('involvedPeople', e.target.value)}
+                                            placeholder="Bijv. Berten Vanderbruggen en Barbara Geenen (hosts)"
+                                            className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg"
+                                        />
+                                    </div>
+
+                                    <button
+                                        onClick={generateStrategy}
+                                        disabled={loading || !formData.seriesTitle || !formData.seriesDescription || !formData.startDate || !formData.targetAudience || !formData.involvedPeople}
+                                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-5 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg shadow-lg hover:shadow-xl mt-8"
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <Loader2 />
+                                                AI genereert je strategie...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Sparkles />
+                                                Genereer Complete Strategie
+                                            </>
+                                        )}
+                                    </button>
+
+                                    <p className="text-center text-xs text-gray-500 mt-4">
+                                        ⚡ AI analyseert je input en creëert een professioneel publicatieschema in ~30 seconden
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (step === 'results' && strategy) {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-8">
+                        <div className="max-w-7xl mx-auto">
+                            {/* Header */}
+                            <div className="bg-white rounded-3xl shadow-2xl p-8 mb-6">
+                                <div className="flex justify-between items-start mb-6">
+                                    <div>
+                                        <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+                                            {formData.seriesTitle}
+                                        </h1>
+                                        <p className="text-xl text-gray-600 italic">{strategy.strategyOverview.tagline}</p>
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={exportToExcel}
+                                            className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-semibold shadow-lg"
+                                        >
+                                            <Download />
+                                            Exporteer CSV
+                                        </button>
+                                        <button
+                                            onClick={() => setStep('form')}
+                                            className="px-6 py-3 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-colors font-semibold shadow-lg"
+                                        >
+                                            Nieuwe Strategie
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="grid md:grid-cols-3 gap-6">
+                                    <div className="bg-gradient-to-br from-purple-100 to-purple-50 rounded-2xl p-6">
+                                        <div className="text-sm font-semibold text-purple-900 mb-2">📊 Kernstrategie</div>
+                                        <p className="text-sm text-purple-800">{strategy.strategyOverview.coreStrategy}</p>
+                                    </div>
+                                    <div className="bg-gradient-to-br from-pink-100 to-pink-50 rounded-2xl p-6">
+                                        <div className="text-sm font-semibold text-pink-900 mb-2">🎯 Doelgroep</div>
+                                        <p className="text-sm text-pink-800">{strategy.strategyOverview.targetAudience}</p>
+                                    </div>
+                                    <div className="bg-gradient-to-br from-indigo-100 to-indigo-50 rounded-2xl p-6">
+                                        <div className="text-sm font-semibold text-indigo-900 mb-2">✨ Unieke Hoek</div>
+                                        <p className="text-sm text-indigo-800">{strategy.strategyOverview.uniqueAngle}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Trailer */}
+                            {strategy.trailer && (
+                                <div className="bg-white rounded-3xl shadow-xl p-8 mb-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                        🎬 Trailer Strategie
+                                    </h2>
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        <div>
+                                            <div className="text-sm font-semibold text-gray-600 mb-1">Publicatiedatum</div>
+                                            <div className="text-lg font-bold text-purple-600">{strategy.trailer.publishDate} om {strategy.trailer.publishTime}</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-semibold text-gray-600 mb-1">Aanbevolen duur</div>
+                                            <div className="text-lg font-bold text-purple-600">{strategy.trailer.duration}</div>
+                                        </div>
+                                    </div>
+                                    <div className="mt-4 p-4 bg-purple-50 rounded-xl">
+                                        <div className="text-sm font-semibold text-purple-900 mb-2">Kernboodschap</div>
+                                        <p className="text-purple-800">{strategy.trailer.message}</p>
+                                    </div>
+                                    <div className="mt-4">
+                                        <div className="text-sm font-semibold text-gray-700 mb-2">Promotie kanalen</div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {strategy.trailer.promotionChannels.map((channel, idx) => (
+                                                <span key={idx} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+                                                    {channel}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Episodes */}
+                            <div className="bg-white rounded-3xl shadow-xl p-8 mb-6">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                    🎙️ Publicatieschema
+                                </h2>
+                                <div className="space-y-4">
+                                    {strategy.episodes.map((ep, idx) => (
+                                        <div key={idx} className="border-2 border-purple-200 rounded-2xl p-6 hover:border-purple-400 transition-all">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-3 mb-2">
+                                                        <span className="px-3 py-1 bg-purple-600 text-white rounded-full text-sm font-bold">
+                                                            Afl {ep.number}
+                                                        </span>
+                                                        <h3 className="text-lg font-bold text-gray-800">{ep.title}</h3>
+                                                    </div>
+                                                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                                                        <span>📅 {ep.publishDate} ({ep.publishDay})</span>
+                                                        <span>⏰ {ep.publishTime}</span>
+                                                        <span>📝 Deadline: {ep.deadline}</span>
+                                                    </div>
+                                                </div>
+                                                <span className={`px-4 py-2 rounded-xl text-sm font-bold ${
+                                                    ep.accessType === 'gratis' ? 'bg-green-100 text-green-800' :
+                                                    ep.accessType === 'betalend' ? 'bg-amber-100 text-amber-800' :
+                                                    'bg-blue-100 text-blue-800'
+                                                }`}>
+                                                    {ep.accessType === 'gratis' ? '🆓 Gratis' :
+                                                     ep.accessType === 'betalend' ? '💎 Betalend' :
+                                                     '🔄 Mixed'}
+                                                </span>
+                                            </div>
+                                            
+                                            {ep.subscriberBenefit && (
+                                                <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                                                    <div className="text-xs font-semibold text-blue-900 mb-1">💡 Voordeel abonnees</div>
+                                                    <p className="text-sm text-blue-800">{ep.subscriberBenefit}</p>
+                                                </div>
+                                            )}
+
+                                            <div className="grid md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <div className="text-xs font-semibold text-gray-600 mb-2">Eigen kanalen</div>
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {ep.platforms.ownChannels.map((channel, cIdx) => (
+                                                            <span key={cIdx} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs">
+                                                                {channel}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div className="text-xs font-semibold text-gray-600 mb-2">Externe platforms</div>
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {ep.platforms.external.map((platform, pIdx) => (
+                                                            <span key={pIdx} className="px-2 py-1 bg-pink-100 text-pink-700 rounded text-xs">
+                                                                {platform}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="mt-3 text-xs text-gray-600 italic">
+                                                💭 {ep.platforms.timing}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Marketing Timeline */}
+                            <div className="bg-white rounded-3xl shadow-xl p-8 mb-6">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                    📅 Marketing Timeline
+                                </h2>
+                                
+                                {['preLaunch', 'launchWeek', 'duringSeries', 'postLaunch'].map(phase => {
+                                    const phaseName = phase === 'preLaunch' ? '🚀 Pre-Launch' : 
+                                                     phase === 'launchWeek' ? '🎉 Launch Week' :
+                                                     phase === 'duringSeries' ? '📈 Tijdens Reeks' : '🎯 Post-Launch';
+                                    const phaseColor = phase === 'preLaunch' ? 'purple' :
+                                                      phase === 'launchWeek' ? 'pink' :
+                                                      phase === 'duringSeries' ? 'blue' : 'green';
+                                    
+                                    if (!strategy.marketingTimeline[phase] || strategy.marketingTimeline[phase].length === 0) return null;
+                                    
+                                    return (
+                                        <div key={phase} className="mb-6">
+                                            <h3 className="text-lg font-bold text-gray-800 mb-3">{phaseName}</h3>
+                                            {strategy.marketingTimeline[phase].map((weekData, wIdx) => (
+                                                <div key={wIdx} className="mb-4">
+                                                    <div className="text-sm font-semibold text-gray-600 mb-2">{weekData.week}</div>
+                                                    <div className="space-y-2">
+                                                        {weekData.activities.map((act, aIdx) => (
+                                                            <div key={aIdx} className={`p-4 rounded-xl border-2 border-${phaseColor}-200 bg-${phaseColor}-50`}>
+                                                                <div className="flex justify-between items-start">
+                                                                    <div className="flex-1">
+                                                                        <div className="font-semibold text-gray-800">{act.activity}</div>
+                                                                        <div className="text-sm text-gray-600 mt-1">🎯 {act.goal}</div>
+                                                                    </div>
+                                                                    <div className="text-right ml-4">
+                                                                        <div className="text-sm font-semibold text-gray-700">{act.date}</div>
+                                                                        <div className="text-xs text-gray-600">{act.channel}</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Cross Promotion */}
+                            <div className="bg-white rounded-3xl shadow-xl p-8 mb-6">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                    🔄 Cross-promotie
+                                </h2>
+                                
+                                {strategy.crossPromotion.midrolls && strategy.crossPromotion.midrolls.length > 0 && (
+                                    <div className="mb-6">
+                                        <h3 className="text-lg font-semibold text-gray-700 mb-3">📻 Midroll Advertenties</h3>
+                                        {strategy.crossPromotion.midrolls.map((midroll, idx) => (
+                                            <div key={idx} className="p-4 bg-indigo-50 border-2 border-indigo-200 rounded-xl mb-3">
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <div className="font-bold text-indigo-900">{midroll.podcast}</div>
+                                                        <p className="text-sm text-indigo-800 mt-2">{midroll.message}</p>
+                                                        <div className="text-sm font-semibold text-indigo-700 mt-2">→ {midroll.callToAction}</div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        {midroll.dates.map((date, dIdx) => (
+                                                            <div key={dIdx} className="text-sm text-indigo-700">{date}</div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {strategy.crossPromotion.teasers && strategy.crossPromotion.teasers.length > 0 && (
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-gray-700 mb-3">🎬 Teasers</h3>
+                                        {strategy.crossPromotion.teasers.map((teaser, idx) => (
+                                            <div key={idx} className="p-4 bg-purple-50 border-2 border-purple-200 rounded-xl mb-3">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div className="font-bold text-purple-900">{teaser.type}</div>
+                                                    <div className="text-sm text-purple-700">{teaser.publishDate}</div>
+                                                </div>
+                                                <div className="flex flex-wrap gap-2 mb-2">
+                                                    {teaser.platforms.map((platform, pIdx) => (
+                                                        <span key={pIdx} className="px-2 py-1 bg-purple-200 text-purple-800 rounded text-xs font-medium">
+                                                            {platform}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                                <p className="text-sm text-purple-800">{teaser.content}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Social Media */}
+                            <div className="bg-white rounded-3xl shadow-xl p-8 mb-6">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                    📱 Social Media Strategie
+                                </h2>
+                                <div className="grid md:grid-cols-3 gap-6">
+                                    {['instagram', 'tiktok', 'linkedin'].map(platform => {
+                                        const data = strategy.socialMedia[platform];
+                                        if (!data || Object.keys(data).length === 0) return null;
+                                        
+                                        const platformEmoji = platform === 'instagram' ? '📸' :
+                                                            platform === 'tiktok' ? '🎵' : '💼';
+                                        const platformColor = platform === 'instagram' ? 'pink' :
+                                                             platform === 'tiktok' ? 'purple' : 'blue';
+                                        
+                                        return (
+                                            <div key={platform} className={`p-6 bg-${platformColor}-50 border-2 border-${platformColor}-200 rounded-2xl`}>
+                                                <div className="text-lg font-bold text-gray-800 mb-3 capitalize">
+                                                    {platformEmoji} {platform}
+                                                </div>
+                                                {data.frequency && (
+                                                    <div className="mb-2">
+                                                        <div className="text-xs font-semibold text-gray-600">Frequentie</div>
+                                                        <div className="text-sm text-gray-800">{data.frequency}</div>
+                                                    </div>
+                                                )}
+                                                {data.contentTypes && data.contentTypes.length > 0 && (
+                                                    <div className="mb-2">
+                                                        <div className="text-xs font-semibold text-gray-600 mb-1">Content types</div>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {data.contentTypes.map((type, idx) => (
+                                                                <span key={idx} className="text-xs bg-white px-2 py-1 rounded">{type}</span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {data.timing && (
+                                                    <div className="text-xs text-gray-700 italic mt-2">
+                                                        ⏰ {data.timing}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* KPIs */}
+                            {strategy.kpis && (
+                                <div className="bg-white rounded-3xl shadow-xl p-8 mb-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                        📊 KPIs & Success Metrics
+                                    </h2>
+                                    <div className="grid md:grid-cols-3 gap-6 mb-6">
+                                        {Object.entries(strategy.kpis.targets || {}).map(([key, value], idx) => (
+                                            <div key={idx} className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border-2 border-green-200">
+                                                <div className="text-sm font-semibold text-green-900 mb-1 capitalize">{key}</div>
+                                                <div className="text-2xl font-bold text-green-600">{value}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {strategy.kpis.primaryMetrics && (
+                                        <div className="mb-4">
+                                            <div className="text-sm font-semibold text-gray-700 mb-2">Primaire metrics</div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {strategy.kpis.primaryMetrics.map((metric, idx) => (
+                                                    <span key={idx} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                                                        {metric}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {strategy.kpis.measurementPlan && (
+                                        <div className="p-4 bg-gray-50 rounded-xl">
+                                            <div className="text-sm font-semibold text-gray-700 mb-1">Meetplan</div>
+                                            <p className="text-sm text-gray-600">{strategy.kpis.measurementPlan}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Recommendations */}
+                            {strategy.recommendations && (
+                                <div className="bg-white rounded-3xl shadow-xl p-8">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                        💡 Aanbevelingen & Tips
+                                    </h2>
+                                    
+                                    {strategy.recommendations.weeklyChecklist && (
+                                        <div className="mb-6">
+                                            <h3 className="text-lg font-semibold text-gray-700 mb-3">✅ Wekelijkse Checklist</h3>
+                                            <div className="space-y-2">
+                                                {strategy.recommendations.weeklyChecklist.map((item, idx) => (
+                                                    <div key={idx} className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+                                                        <span className="text-blue-600 font-bold">✓</span>
+                                                        <span className="text-sm text-gray-800">{item}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {strategy.recommendations.riskMitigation && (
+                                        <div className="mb-6">
+                                            <h3 className="text-lg font-semibold text-gray-700 mb-3">⚠️ Risico's & Oplossingen</h3>
+                                            <div className="space-y-2">
+                                                {strategy.recommendations.riskMitigation.map((item, idx) => (
+                                                    <div key={idx} className="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-400">
+                                                        <span className="text-sm text-gray-800">{item}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {strategy.recommendations.optimizationTips && (
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-gray-700 mb-3">🚀 Optimalisatie Tips</h3>
+                                            <div className="space-y-2">
+                                                {strategy.recommendations.optimizationTips.map((tip, idx) => (
+                                                    <div key={idx} className="flex items-start gap-3 p-3 bg-green-50 rounded-lg">
+                                                        <span className="text-green-600 font-bold">💡</span>
+                                                        <span className="text-sm text-gray-800">{tip}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            }
+
+            return null;
+        };
+
+        ReactDOM.render(<PodcastStrategyPlanner />, document.getElementById('root'));
+    </script>
+</body>
+</html>
